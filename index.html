@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>카드 포스 마술</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f9f9f9;
+    }
+    #card-display {
+      font-size: 50px;
+      margin: 30px;
+    }
+    #force-card {
+      margin: 20px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+    button {
+      font-size: 20px;
+      padding: 10px 20px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(13, 40px);
+      gap: 10px;
+      justify-content: center;
+      margin: 10px auto;
+      max-width: 600px;
+    }
+    .card-img {
+      width: 40px;
+      cursor: pointer;
+    }
+    #card-img {
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>마술용 카드 포스</h2>
+
+<div id="card-display">
+  <img id="card-img" src="" alt="카드">
+</div>
+
+<button onclick="startCycle()">카드 넘기기 시작</button>
+<button onclick="stopCycle()">멈춰</button>
+<button onclick="toggleSettings()">포스 카드 설정</button>
+
+<div id="force-card">선택된 포스 카드: <span id="selected-force">♠A</span></div>
+
+<div id="settings" style="display:none;">
+  <h3>포스 카드 선택</h3>
+  <div class="card-grid" id="card-grid"></div>
+</div>
+
+<script>
+const suits = ['♠', '♥', '♦', '♣'];
+const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let cards = [];
+let timer;
+let currentCard = '';
+let forceCard = '♠A';
+
+function generateCards() {
+  cards = [];
+  for (let s of suits) {
+    for (let r of ranks) {
+      cards.push(`${s}${r}`);
+    }
+  }
+}
+generateCards();
+
+function getCardImage(card) {
+  // 예: ♠A -> sa.png
+  const suitMap = { '♠': 's', '♥': 'h', '♦': 'd', '♣': 'c' };
+  const rankMap = { 'A': 'a', 'J': 'j', 'Q': 'q', 'K': 'k' };
+  let suit = suitMap[card[0]];
+  let rank = rankMap[card.slice(1)] || card.slice(1);
+  return `https://raw.githubusercontent.com/hayeon-dev/card-images/main/png/${suit}${rank}.png`;
+}
+
+function showCard(card) {
+  document.getElementById("card-img").src = getCardImage(card);
+  currentCard = card;
+}
+
+function startCycle() {
+  stopCycle();
+  timer = setInterval(() => {
+    const randomCard = cards[Math.floor(Math.random() * cards.length)];
+    showCard(randomCard);
+  }, 100);
+}
+
+function stopCycle() {
+  clearInterval(timer);
+  showCard(forceCard);
+}
+
+function toggleSettings() {
+  const div = document.getElementById("settings");
+  div.style.display = (div.style.display === "none") ? "block" : "none";
+}
+
+function createCardGrid() {
+  const grid = document.getElementById("card-grid");
+  for (let card of cards) {
+    const img = document.createElement("img");
+    img.src = getCardImage(card);
+    img.className = "card-img";
+    img.title = card;
+    img.onclick = () => {
+      forceCard = card;
+      document.getElementById("selected-force").textContent = card;
+      toggleSettings();
+    };
+    grid.appendChild(img);
+  }
+}
+createCardGrid();
+showCard('🂠'); // 시작 시 뒷면
+</script>
+
+</body>
+</html>
